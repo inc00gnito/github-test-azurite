@@ -1,0 +1,22 @@
+name: Check WebApi build and passes tests
+ 
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+    branches: [main]
+
+env:
+  dotnet-version: '8.0'
+  app-configuration: 'Release'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Check if app builds and passes tests
+      uses: './.github/actions/check-web-test'
+      with:
+        app-configuration: ${{ env.app-configuration }}
+        dotnet-version: ${{ env.dotnet-version }}
