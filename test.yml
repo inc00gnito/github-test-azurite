@@ -1,46 +1,28 @@
-name: Test with Azurite
+name: webapi-run-tests
+description: 'Check if application builds and if all tests pass'
+inputs:
+  dotnet-version:
+    description: 'Version of .Net'
+    required: false
+    default: '8.x'
+  app-configuration:
+    description: Application configuration
+    required: false
+    default: 'Release'
 
-on:
-  schedule:
-    - cron: '0 12 * * *'
-  workflow_dispatch:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-
-jobs:
-  build:
-    
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os:
-          - macos-latest
-          - ubuntu-latest
-          - windows-latest
-
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v3
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup DotNet Environment
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 8.0.x
-
-    - name: Restore dependencies
-      run: dotnet restore
-
-    - name: Build
-      run: dotnet build --no-restore
+        dotnet-version: ${{ inputs.dotnet-version }}
 
     - name: Install Azurite
-      run: npx --yes --loglevel info azurite --version
+    - run: npm install -g azurite
+      - shell: bash
+        run: azurite-table &
 
-    # use bash even on Windows to run Azurite in the background (& for asynchronous bash command)
-    - name: Start Azurite
+    - name: Build & Test
       shell: bash
-      run: npx --yes azurite --silent --inMemoryPersistence &
-
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet test --configuration ${{ inputs.app-configuration }}
