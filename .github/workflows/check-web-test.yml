@@ -16,7 +16,7 @@ jobs:
     - uses: actions/checkout@v4
     
     - name: Check if app builds and passes tests
-      uses: './.github/actions/check-web-test'
+      uses: './.github/test'
       with:
         app-configuration: ${{ env.app-configuration }}
         dotnet-version: ${{ env.dotnet-version }}
